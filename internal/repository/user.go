@@ -1,10 +1,8 @@
 package repository
 
 import (
-    "database/sql"
-    "JobFetcher/internal/domain"
-
-    "log"
+	"JobFetcher/internal/domain"
+	"database/sql"
 )
 
 type UserRepository struct {
@@ -45,8 +43,6 @@ func (r *UserRepository) GetAllUsers() ([]domain.User, error) {
 }
 
 func (r *UserRepository) CreateUser(user *domain.User) error {
-    log.Println("CreateUser")
-    log.Println(user)
     _, err := r.db.Exec("INSERT INTO users (name, email) VALUES (?, ?)", user.Name, user.Email)
     if err != nil {
         return err

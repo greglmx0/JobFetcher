@@ -1,14 +1,13 @@
 package handlers
 
 import (
-    "encoding/json"
-    "net/http"
-    "strconv"
-    "log"
+	"JobFetcher/internal/domain"
+	"JobFetcher/internal/usecase"
+	"encoding/json"
+	"net/http"
+	"strconv"
 
-    "github.com/gorilla/mux"
-    "JobFetcher/internal/usecase"
-    "JobFetcher/internal/domain"
+	"github.com/gorilla/mux"
 )
 
 type UserHandler struct {
@@ -49,14 +48,11 @@ func (h *UserHandler) GetAllUsersHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *UserHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
-    log.Println("CreateUserHandler")
     var user domain.User
     if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
         http.Error(w, "Invalid request payload", http.StatusBadRequest)
         return
     }
-
-    log.Println(user)
 
     if err := h.userUseCase.CreateUser(&user); err != nil {
         http.Error(w, "Failed to create user", http.StatusInternalServerError)
