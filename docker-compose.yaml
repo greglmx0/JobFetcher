@@ -4,7 +4,7 @@ services:
     stdin_open: true
     tty: true
     volumes:
-      - ./db/:/root/db/
+      - ./db/:/db/data/
 
   app:
     build:
