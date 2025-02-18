@@ -50,12 +50,18 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	userUseCase := usecase.NewUserUseCase(userRepo)
 	userHandler := handlers.NewUserHandler(userUseCase)
+	webSiteRepo := repository.NewWebsiteRepository(db)
+	webSiteUseCase := usecase.NewWebsiteUseCase(webSiteRepo)
+	websiteHandler := handlers.NewWebsiteHandler(webSiteUseCase)
 
 	// Configurer le routeur HTTP
 	r := mux.NewRouter()
 	r.HandleFunc("/user/{id:[0-9]+}", userHandler.GetUserHandler).Methods("GET")
 	r.HandleFunc("/users", userHandler.GetAllUsersHandler).Methods("GET")
 	r.HandleFunc("/user", userHandler.CreateUserHandler).Methods("POST")
+
+	r.HandleFunc("/website", websiteHandler.CreateWebsiteHandler).Methods("POST")
+	r.HandleFunc("/websites", websiteHandler.GetAllWebsitesHandler).Methods("GET")
 
 	log.Println("Serveur en cours d'exécution sur le port 8080")
 	log.Fatal(http.ListenAndServe(":8080", r))

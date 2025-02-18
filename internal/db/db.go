@@ -17,7 +17,17 @@ func InitDB(dbPath string) (*sql.DB, error) {
 		return nil, err
 	}
 
+	// err = dropAllTables(db)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
 	err = createUsersTable(db)
+	if err != nil {
+		return nil, err
+	}
+
+	err = createWebSitesTable(db)
 	if err != nil {
 		return nil, err
 	}
@@ -33,12 +43,35 @@ func ensureDBFolderExists(dbPath string) {
 	}
 }
 
-// createUsersTable crée la table utilisateurs si elle n'existe pas
+func dropAllTables(db *sql.DB) error {
+	_, err := db.Exec(`DROP TABLE IF EXISTS users`)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(`DROP TABLE IF EXISTS websites`)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func createUsersTable(db *sql.DB) error {
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
 		email TEXT NOT NULL
+	)`)
+	return err
+}
+
+func createWebSitesTable(db *sql.DB) error {
+	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS websites (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL,
+		url TEXT NOT NULL,
+		methode TEXT NOT NULL
 	)`)
 	return err
 }
