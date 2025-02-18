@@ -1,8 +1,8 @@
 package usecase
 
 import (
-    "JobFetcher/internal/domain"
-    "JobFetcher/internal/repository"
+	"JobFetcher/internal/domain"
+	"JobFetcher/internal/repository"
 )
 
 type UserUseCase struct {
@@ -21,6 +21,10 @@ func (u *UserUseCase) GetAllUsers() ([]domain.User, error) {
     return u.userRepo.GetAllUsers()
 }
 
-func (u *UserUseCase) CreateUser(user *domain.User) error {
-    return u.userRepo.CreateUser(user)
+func (u *UserUseCase) CreateUser(user *domain.User) (*domain.User, error) {
+    return  u.userRepo.CreateUser(user)
+}
+
+func (u *UserUseCase) GetUserByEmail(email string) (*domain.User, error) {
+    return u.userRepo.GetUserByEmail(email)
 }

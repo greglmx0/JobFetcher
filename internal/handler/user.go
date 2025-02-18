@@ -4,6 +4,7 @@ import (
 	"JobFetcher/internal/domain"
 	"JobFetcher/internal/usecase"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -54,12 +55,21 @@ func (h *UserHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) 
         return
     }
 
-    if err := h.userUseCase.CreateUser(&user); err != nil {
+    if _, err := h.userUseCase.GetUserByEmail(user.Email); err == nil {
+        http.Error(w, "User already exists", http.StatusConflict)
+        return
+    }
+    
+    var newUser *domain.User
+    newUser, err := h.userUseCase.CreateUser(&user)
+    log.Printf("User created: %+v", newUser)
+
+    if err != nil {
         http.Error(w, "Failed to create user", http.StatusInternalServerError)
         return
     }
 
     w.Header().Set("Content-Type", "application/json")
     w.WriteHeader(http.StatusCreated)
-    json.NewEncoder(w).Encode(user)
+    json.NewEncoder(w).Encode(newUser)
 }
