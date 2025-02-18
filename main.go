@@ -1,63 +1,65 @@
 package main
 
 import (
+	"JobFetcher/internal/db"
 	"fmt"
-	"os"
-
-	"github.com/robfig/cron"
-
-	"database/sql"
 	"log"
 	"net/http"
-
-	"github.com/gorilla/mux"
-	_ "github.com/mattn/go-sqlite3"
+	"os"
+	"strconv"
 
 	handlers "JobFetcher/internal/handler"
 	"JobFetcher/internal/repository"
+	"JobFetcher/internal/telegram"
 	"JobFetcher/internal/usecase"
+
+	"github.com/gorilla/mux"
+	"github.com/robfig/cron"
 )
 
-
-
-
 func main() {
-    c := cron.New()
-    i := 0
-    c.AddFunc("*/5 * * * * *", func() {
-        i++
-        fmt.Println("Hello, world!" + fmt.Sprint(i))
-    })
-    c.Start()
 
-    dbPath := "/app/data/jobfetcher.db"
-    ensureDBFolderExists() // Assure que le dossier existe
-    db, err := sql.Open("sqlite3", dbPath+"?_cache=shared&mode=rwc")
-    // db, err := sql.Open("sqlite3", "/root/db/jobfetcher.db?_cache=shared&mode=rwc")
-    if err != nil {
-        log.Fatal(err)
-    }
+	// get env variables TELEGRAM_BOT_TOKEN
+	telegramToken := os.Getenv("TELEGRAM_BOT_TOKEN")
+	telegramChatIDStr := os.Getenv("TELEGRAM_CHAT_ID")
+	telegramChatID, err := strconv.ParseInt(telegramChatIDStr, 10, 64)
 
-    defer db.Close()
-    
-    userRepo := repository.NewUserRepository(db)
-    userUseCase := usecase.NewUserUseCase(userRepo)
-    userHandler := handlers.NewUserHandler(userUseCase)
-    
-    r := mux.NewRouter()
-    r.HandleFunc("/user/{id:[0-9]+}", userHandler.GetUserHandler).Methods("GET")
-    r.HandleFunc("/users", userHandler.GetAllUsersHandler).Methods("GET")
-    r.HandleFunc("/user", userHandler.CreateUserHandler).Methods("POST")
-    
-    log.Println("Server running on port 8080")
-    log.Fatal(http.ListenAndServe(":8080", r))
-    
-    select {}
-}
+	log.Println("Initialisation du bot Telegram")
+	telegramBot, err := telegram.NewTelegramBot(telegramToken)
 
-func ensureDBFolderExists() {
-    err := os.MkdirAll("/app/data", 0755)
-    if err != nil {
-        log.Fatal(err)
-    }
+	// Initialiser le planificateur de tâches cron
+	c := cron.New()
+	i := 0
+	c.AddFunc("*/5 * * * * *", func() {
+		i++
+		log.Printf("Hello, world %d!", i)
+
+		message := "Hello, world " + fmt.Sprint(i) + " !"
+		telegramBot.SendMessage(int64(telegramChatID), message)
+	})
+	c.Start()
+
+	// Initialiser la base de données
+	db, err := db.InitDB("/app/data/jobfetcher.db")
+	if err != nil {
+		log.Fatalf("Erreur lors de l'initialisation de la base de données: %v", err)
+	}
+	defer db.Close()
+
+	// Initialiser les dépendances
+	userRepo := repository.NewUserRepository(db)
+	userUseCase := usecase.NewUserUseCase(userRepo)
+	userHandler := handlers.NewUserHandler(userUseCase)
+
+	// Configurer le routeur HTTP
+	r := mux.NewRouter()
+	r.HandleFunc("/user/{id:[0-9]+}", userHandler.GetUserHandler).Methods("GET")
+	r.HandleFunc("/users", userHandler.GetAllUsersHandler).Methods("GET")
+	r.HandleFunc("/user", userHandler.CreateUserHandler).Methods("POST")
+
+	log.Println("Serveur en cours d'exécution sur le port 8080")
+	log.Fatal(http.ListenAndServe(":8080", r))
+
+	// Bloquer indéfiniment pour garder le planificateur cron en cours d'exécution
+	select {}
 }
