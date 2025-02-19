@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -37,7 +38,9 @@ func InitDB(dbPath string) (*sql.DB, error) {
 
 // ensureDBFolderExists vérifie et crée le dossier de la base de données s'il n'existe pas
 func ensureDBFolderExists(dbPath string) {
-	dir := "/app/data"
+
+	length := strings.LastIndex(dbPath, "/")
+	dir := dbPath[0:length]
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		log.Fatalf("Erreur lors de la création du dossier de la base de données: %v", err)
 	}
