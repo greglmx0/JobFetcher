@@ -33,13 +33,13 @@ func (h *WebsiteHandler) CreateWebsiteHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	if _, err := h.websiteUseCase.CreateWebsite(&website); err != nil {
-		http.Error(w, "Failed to create website", http.StatusInternalServerError)
+	if _, err := h.websiteUseCase.GetWebsiteByName(website.Name); err == nil {
+		http.Error(w, "Website already exists", http.StatusConflict)
 		return
 	}
 
-	if _, err := h.websiteUseCase.GetWebsiteByName(website.Name); err == nil {
-		http.Error(w, "Website already exists", http.StatusConflict)
+	if _, err := h.websiteUseCase.CreateWebsite(&website); err != nil {
+		http.Error(w, "Failed to create website", http.StatusInternalServerError)
 		return
 	}
 
