@@ -32,7 +32,7 @@ services:
       - .:/data/
     environment:
     - TZ=Europe/Paris
-    - PASSWORD=
+    - PASSWORD=${PHP_LITE_ADMIN_PASSWORD}
     - LOCATION=/data/
 
 volumes:
