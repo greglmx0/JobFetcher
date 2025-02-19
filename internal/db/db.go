@@ -41,8 +41,14 @@ func ensureDBFolderExists(dbPath string) {
 
 	length := strings.LastIndex(dbPath, "/")
 	dir := dbPath[0:length]
+
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		log.Fatalf("Erreur lors de la création du dossier de la base de données: %v", err)
+	}
+	// change le propriétaire du dossier
+	err := os.Chown(dir, 1000, 1000)
+	if err != nil {
+		log.Fatalf("Erreur lors du changement de propriétaire du dossier de la base de données: %v", err)
 	}
 }
 
