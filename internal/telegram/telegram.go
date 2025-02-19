@@ -21,18 +21,14 @@ func NewTelegramBot(token string) (*TelegramBot, error) {
 }
 
 func (tb *TelegramBot) SendMessage(chatID int64, message string) error {
-	log.Printf("Envoi du message: %s", message)
 
 	sendMessageTelegram := os.Getenv("SEND_MESSAGE_TELEGRAM")
-	log.Println("sendMessageTelegram: ", sendMessageTelegram)
 	if sendMessageTelegram == "" {
 		sendMessageTelegram = "true"
 	}
 
 	if sendMessageTelegram == "false" {
-		log.Println("Envoi de message Telegram désactivé")
-		log.Println("ChatID: ", chatID)
-		log.Println("Message: ", message)
+		log.Println(`La variable d'environnement "SEND_MESSAGE_TELEGRAM" est définie à "false", le message [` + message + `] ne sera pas envoyé`)
 		return nil
 	} else {
 
@@ -42,10 +38,9 @@ func (tb *TelegramBot) SendMessage(chatID int64, message string) error {
 		if err != nil {
 			log.Fatalf("Erreur lors de l'envoi du message: %v", err)
 			return err
+		} else {
+			log.Printf("Message envoyé: %s", message)
 		}
-
-		log.Printf("Message envoyé: %s", message)
-
 	}
 	return nil
 }
