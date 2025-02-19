@@ -19,6 +19,25 @@ services:
     environment:
       - TELEGRAM_BOT_TOKEN
       - TELEGRAM_CHAT_ID
+      - SEND_MESSAGE_TELEGRAM
+
+  phpliteadmin:
+    hostname: phpliteadmin
+    container_name: phpliteadmin
+    image: vtacquet/phpliteadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    volumes:
+      - ./db/:/db/data/
+    environment:
+      - DATABASE_NAME=/db/data/db.sqlite3
+      - DATABASE_PASSWORD=123456
+      - DATABASE_USER=admin
+      - DATABASE_TYPE=sqlite
+      - DATABASE_FILE=db.sqlite3
+      - DATABASE_PATH=/db/data/
+      - DATABASE_HOST=sqlite3
 
 volumes:
   db:
