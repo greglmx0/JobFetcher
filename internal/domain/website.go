@@ -5,4 +5,5 @@ type Website struct {
 	Name    string
 	URL     string
 	Methode string
+	Body    string
 }

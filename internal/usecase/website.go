@@ -24,3 +24,7 @@ func (w *WebsiteUseCase) CreateWebsite(website *domain.Website) (*domain.Website
 func (w *WebsiteUseCase) GetWebsiteByName(name string) (*domain.Website, error) {
 	return w.websiteRepo.GetWebsiteByName(name)
 }
+
+func (w *WebsiteUseCase) DeleteWebsiteByID(id int) error {
+	return w.websiteRepo.DeleteWebsiteByID(id)
+}

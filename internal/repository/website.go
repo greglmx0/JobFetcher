@@ -23,7 +23,7 @@ func NewWebsiteRepository(db *sql.DB) *WebsiteRepository {
 // }
 
 func (r *WebsiteRepository) GetAllWebsites() ([]domain.Website, error) {
-	rows, err := r.db.Query("SELECT id, name, url, methode FROM websites")
+	rows, err := r.db.Query("SELECT id, name, url, methode, body FROM websites")
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func (r *WebsiteRepository) GetAllWebsites() ([]domain.Website, error) {
 	var websites []domain.Website
 	for rows.Next() {
 		var website domain.Website
-		err := rows.Scan(&website.ID, &website.Name, &website.URL, &website.Methode)
+		err := rows.Scan(&website.ID, &website.Name, &website.URL, &website.Methode, &website.Body)
 		if err != nil {
 			return nil, err
 		}
@@ -43,7 +43,7 @@ func (r *WebsiteRepository) GetAllWebsites() ([]domain.Website, error) {
 }
 
 func (r *WebsiteRepository) CreateWebsite(website *domain.Website) (*domain.Website, error) {
-	_, err := r.db.Exec("INSERT INTO websites (name, url, methode) VALUES (?, ?, ?)", website.Name, website.URL, website.Methode)
+	_, err := r.db.Exec("INSERT INTO websites (name, url, methode, body) VALUES (?, ?, ?, ?)", website.Name, website.URL, website.Methode, website.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -52,9 +52,17 @@ func (r *WebsiteRepository) CreateWebsite(website *domain.Website) (*domain.Webs
 
 func (r *WebsiteRepository) GetWebsiteByName(name string) (*domain.Website, error) {
 	var website domain.Website
-	err := r.db.QueryRow("SELECT id, name, url,	methode FROM websites WHERE name = ?", name).Scan(&website.ID, &website.Name, &website.URL, &website.Methode)
+	err := r.db.QueryRow("SELECT id, name, url,	methode, body FROM websites WHERE name = ?", name).Scan(&website.ID, &website.Name, &website.URL, &website.Methode, &website.Body)
 	if err != nil {
 		return nil, err
 	}
 	return &website, nil
+}
+
+func (r *WebsiteRepository) DeleteWebsiteByID(id int) error {
+	_, err := r.db.Exec("DELETE FROM websites WHERE id = ?", id)
+	if err != nil {
+		return err
+	}
+	return nil
 }
