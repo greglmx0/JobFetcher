@@ -33,6 +33,11 @@ func InitDB(dbPath string) (*sql.DB, error) {
 		return nil, err
 	}
 
+	err = createMissionsTable(db)
+	if err != nil {
+		return nil, err
+	}
+
 	return db, nil
 }
 
@@ -82,6 +87,24 @@ func createWebSitesTable(db *sql.DB) error {
 		url TEXT NOT NULL,
 		methode TEXT NOT NULL,
 		body	TEXT NULL
+	)`)
+	return err
+}
+
+func createMissionsTable(db *sql.DB) error {
+	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS missions (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		website_id INTEGER NOT NULL,
+		website_source TEXT NOT NULL,
+		mission_title TEXT NOT NULL,
+		mission_posted_date TEXT NOT NULL,
+		organization_name TEXT NOT NULL,
+		country_name TEXT NOT NULL,
+		city_name TEXT NOT NULL,
+		mission_duration INTEGER NOT NULL,
+		mission_start_date TEXT NOT NULL,
+		view_counter INTEGER NOT NULL,
+		candidate_counter INTEGER NOT NULL
 	)`)
 	return err
 }
