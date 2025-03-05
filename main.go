@@ -45,18 +45,29 @@ func main() {
 	webSiteRepo := repository.NewWebsiteRepository(db)
 	webSiteUseCase := usecase.NewWebsiteUseCase(webSiteRepo)
 	websiteHandler := handlers.NewWebsiteHandler(webSiteUseCase)
+	missionRepo := repository.NewMissionRepository(db)
+	missionUseCase := usecase.NewMissionUseCase(missionRepo)
+	missionHandler := handlers.NewMissionHandler(missionUseCase)
 
 	// Configurer le routeur HTTP
 	r := mux.NewRouter()
+
+	// User routes
 	r.HandleFunc("/user/{id:[0-9]+}", userHandler.GetUserHandler).Methods("GET")
 	r.HandleFunc("/users", userHandler.GetAllUsersHandler).Methods("GET")
 	r.HandleFunc("/user", userHandler.CreateUserHandler).Methods("POST")
+	// Website routes
 	r.HandleFunc("/website", websiteHandler.CreateWebsiteHandler).Methods("POST")
 	r.HandleFunc("/websites", websiteHandler.GetAllWebsitesHandler).Methods("GET")
 	r.HandleFunc("/website/{id:[0-9]+}", websiteHandler.DeleteWebsiteHandler).Methods("DELETE")
 
+	// Mission routes
+	r.HandleFunc("/mission", missionHandler.CreateMissionHandler).Methods("POST")
+	r.HandleFunc("/missions", missionHandler.GetAllMissionsHandler).Methods("GET")
+	r.HandleFunc("/mission/{websiteSource}", missionHandler.GetMissionsByWebsiteSourceHandler).Methods("GET")
+
 	// Initialiser le planificateur de tâches cron
-	cron.InitCron(telegramBot, telegramChatID, webSiteRepo)
+	cron.InitCron(telegramBot, telegramChatID, webSiteRepo, missionRepo)
 
 	log.Println("Serveur en cours d'exécution sur le port 8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
