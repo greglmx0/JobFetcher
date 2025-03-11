@@ -3,6 +3,8 @@ package repository
 import (
 	"JobFetcher/internal/domain"
 	"database/sql"
+	"fmt"
+	"log"
 )
 
 type MissionRepository struct {
@@ -51,17 +53,51 @@ func (r *MissionRepository) CreateMission(mission *domain.Mission) (*domain.Miss
 }
 
 func (r *MissionRepository) GetMissionByWebsiteSource(websiteSource string) ([]*domain.Mission, error) {
+	log.Printf("GetMissionByWebsiteSource: %v", websiteSource)
 
 	var missions []*domain.Mission
-	rows, err := r.db.Query("SELECT id, website_id, website_source, mission_title, mission_posted_date, organization_name, country_name, city_name, mission_duration, mission_start_date, view_counter, candidate_counter FROM missions WHERE website_source = ?", websiteSource)
+	// Utilisation de LIKE pour rechercher les missions dont le champ website_source contient la sous-chaîne
+	query := "SELECT id, website_id, website_source, mission_title, mission_posted_date, organization_name, country_name, city_name, mission_duration, mission_start_date, view_counter, candidate_counter FROM missions WHERE website_source LIKE ?"
+
+	// Ajout des pourcentages (%) autour de la chaîne pour indiquer que la sous-chaîne peut être à n'importe quel endroit
+	rows, err := r.db.Query(query, "%"+websiteSource+"%")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Erreur lors de l'exécution de la requête: %v", err)
 	}
 	defer rows.Close()
 
-	// Vérifier si des missions ont été trouvées sinon retourner une slice vide
+	// Parcours des résultats de la requête et remplissage de la slice missions
+	for rows.Next() {
+		var mission domain.Mission
+		err := rows.Scan(
+			&mission.ID,
+			&mission.WebsiteId,
+			&mission.WebsiteSource,
+			&mission.MissionTitle,
+			&mission.MissionPostedDate,
+			&mission.OrganizationName,
+			&mission.CountryName,
+			&mission.CityName,
+			&mission.MissionDuration,
+			&mission.MissionStartDate,
+			&mission.ViewCounter,
+			&mission.CandidateCounter)
+		if err != nil {
+			return nil, fmt.Errorf("Erreur lors de la lecture des résultats: %v", err)
+		}
+
+		// Ajouter la mission à la slice
+		missions = append(missions, &mission)
+	}
+
+	// Vérification des erreurs de parcours des lignes
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("Erreur lors du parcours des résultats: %v", err)
+	}
+
+	// Si aucune mission n'est trouvée, on retourne une slice vide
 	if len(missions) == 0 {
-		return []*domain.Mission{}, nil
+		log.Printf("Aucune mission trouvée pour %v", websiteSource)
 	}
 
 	return missions, nil

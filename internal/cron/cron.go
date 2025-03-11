@@ -8,10 +8,9 @@ import (
 	"net/http"
 	"time"
 
-	"JobFetcher/internal/telegram"
-	// get all web	sites
 	"JobFetcher/internal/domain"
 	"JobFetcher/internal/repository"
+	"JobFetcher/internal/telegram"
 
 	"github.com/robfig/cron"
 )
@@ -28,6 +27,7 @@ type MissionResponce struct {
 	ViewCounter       int    `json:"viewCounter"`
 	CandidateCounter  int    `json:"candidateCounter"`
 }
+
 type APIResponse struct {
 	Result []MissionResponce `json:"result"`
 	Count  int               `json:"count"`
@@ -39,68 +39,67 @@ func InitCron(telegramBot *telegram.TelegramBot, telegramChatID int64, webSiteRe
 	i := 0
 	c.AddFunc("*/5 * * * * *", func() {
 		i++
-		// log.Printf("Hello, world %d!", i)
 
-		// get all websites from the database
-		websites, _ := webSiteRepo.GetAllWebsites()
-		// if err != nil {
-		// 	log.Fatalf("Erreur lors de la récupération des sites web: %v", err)
-		// }
+		// Récupération des sites web
+		websites, err := webSiteRepo.GetAllWebsites()
+		if err != nil {
+			log.Printf("Erreur lors de la récupération des sites web: %v", err)
+			return
+		}
 
+		// Parcours des sites et récupération des missions
 		for _, website := range websites {
 			log.Printf("Site web: %v", website)
 			saveMissions, err := missionRepo.GetMissionByWebsiteSource(website.Name)
 			if err != nil {
-				log.Fatalf("Erreur lors de la récupération des missions: %v", err)
+				log.Printf("Erreur lors de la récupération des missions: %v", err)
+				continue
 			}
+
 			url := website.URL
 			methode := website.Methode
 			body := website.Body
-			missions := []MissionResponce{}
+			var missions []MissionResponce
 
 			if methode == "POST" {
 				log.Printf("🔹 Appel API POST: %s", url)
 				missions, err = PostRequest(url, body)
-
 				if err != nil {
 					log.Printf("Erreur lors de l'appel API: %v", err)
-					return
+					continue
 				}
 			}
 
 			log.Printf("Nombre de missions sauvegardées: %d", len(saveMissions))
-			log.Printf("Nombre de missions: %d", len(missions))
+			log.Printf("Nombre de missions récupérées: %d", len(missions))
 
+			// Sauvegarde et envoi des missions récupérées
 			for _, mission := range missions {
-
 				convertedMission := ConvertMissionResponseToMission(mission, website.Name)
 
 				mis, err := missionRepo.GetMissionsByWebsiteSourceAndWebsiteID(convertedMission.WebsiteSource, convertedMission.WebsiteId)
-
 				if err != nil {
-					log.Fatalf("Erreur lors de la récupération des missions: %v", err)
+					log.Printf("Erreur lors de la récupération des missions: %v", err)
+					continue
 				}
 
+				// Si aucune mission existante, on la sauvegarde
 				if len(mis) == 0 {
 					log.Printf("Sauvegarde de la mission: %v", convertedMission)
 					_, err := missionRepo.CreateMission(convertedMission)
 					if err != nil {
 						log.Printf("Erreur lors de la sauvegarde de la mission: %v", err)
+						continue
 					}
-					// message := "Hello, world " + fmt.Sprint(i) + " !"
-					message := fmt.Sprintf("🔹 Mission: %s | Organisation: %s | Pays: %s | Ville: %s | Durée: %d mois | Vues: %d | Candidats: %d",
-						mission.MissionTitle, mission.OrganizationName, mission.CountryName, mission.CityName, mission.MissionDuration, mission.ViewCounter, mission.CandidateCounter)
+
+					// Envoi du message Telegram  MissionStartDate
+					message := fmt.Sprintf("🔹 Mission: %s \n Organisation: %s  \n Pays: %s  \n Ville: %s  \n Durée: %d mois  \n Vues: %d  \n Candidats: %d  \n Annonce postée le: %s",
+						mission.MissionTitle, mission.OrganizationName, mission.CountryName, mission.CityName, mission.MissionDuration, mission.ViewCounter, mission.CandidateCounter, mission.MissionStartDate)
 
 					telegramBot.SendMessage(telegramChatID, message)
 				}
 			}
-
-			// if methode == "GET" {
-			// 	GetRequest(url)
-			// }
-
 		}
-
 	})
 	c.Start()
 }
@@ -127,6 +126,7 @@ func PostRequest(url string, body string) ([]MissionResponce, error) {
 	return apiResponse.Result, nil
 }
 
+// ConvertMissionResponseToMission convertit une mission API en une mission domain
 func ConvertMissionResponseToMission(mr MissionResponce, websiteSource string) *domain.Mission {
 	return &domain.Mission{
 		WebsiteId:         mr.ID,
