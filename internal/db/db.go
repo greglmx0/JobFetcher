@@ -85,7 +85,8 @@ func createWebSitesTable(db *sql.DB) error {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
 		url TEXT NOT NULL,
-		methode TEXT NOT NULL,
+		source TEXT NOT NULL,
+		method TEXT NOT NULL,
 		body	TEXT NULL
 	)`)
 	return err
