@@ -9,6 +9,8 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
+
+RUN mkdir -p /app/data
 RUN go build -o jobfetcher ./main.go
 
 # Étape 2 : Image minimale pour exécution
@@ -20,7 +22,8 @@ RUN apk add --no-cache sqlite
 
 COPY --from=builder /app/jobfetcher .
 
-COPY --from=builder /app/data ./data
+RUN mkdir -p /app/data
+COPY --from=builder /app/data/ /app/data/
 
 EXPOSE 8080
 
