@@ -21,9 +21,6 @@ RUN apk add --no-cache sqlite
 
 COPY --from=builder /app/jobfetcher .
 
-RUN mkdir -p /app/data
-COPY --from=builder /app/data/ /app/data/
-
 EXPOSE 8080
 
 CMD ["./jobfetcher"]
