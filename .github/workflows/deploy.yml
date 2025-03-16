@@ -29,22 +29,21 @@ jobs:
           overwrite: true
           # rm: true
 
-
       - name: Deploy jobfetcher
-          env:
-            PHP_LITE_ADMIN_PASSWORD: ${{ secrets.PHP_LITE_ADMIN_PASSWORD }}
-            SEND_MESSAGE_TELEGRAM: ${{ secrets.SEND_MESSAGE_TELEGRAM }}
-            TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-            TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          uses: appleboy/ssh-action@master
-          with:
-            host: ${{ secrets.VPS_HOST }}
-            username: ${{ secrets.VPS_USERNAME }}
-            key: ${{ secrets.SSH_PRIVATE_KEY }}
-            port: ${{ secrets.VPS_PORT }}
-            envs: PHP_LITE_ADMIN_PASSWORD,SEND_MESSAGE_TELEGRAM,TELEGRAM_BOT_TOKEN,TELEGRAM_CHAT_ID
-            script: |
-              echo "Starting docker compose for deploy jobfetcher..."
-              cd /var/www/html/jobfetcher
-              docker compose -f docker-compose.prod.yaml up --build
-              echo "Deploy jobfetcher done."
+        env:
+          PHP_LITE_ADMIN_PASSWORD: ${{ secrets.PHP_LITE_ADMIN_PASSWORD }}
+          SEND_MESSAGE_TELEGRAM: ${{ secrets.SEND_MESSAGE_TELEGRAM }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          envs: PHP_LITE_ADMIN_PASSWORD,SEND_MESSAGE_TELEGRAM,TELEGRAM_BOT_TOKEN,TELEGRAM_CHAT_ID
+          script: |
+            echo "Starting docker compose for deploy jobfetcher..."
+            cd /var/www/html/jobfetcher
+            docker compose -f docker-compose.prod.yaml up --build
+            echo "Deploy jobfetcher done."
