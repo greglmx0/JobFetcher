@@ -9,7 +9,6 @@ services:
     restart: always
     ports:
       - "8080:8080"
-    user: "1000:1000"
     environment:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
