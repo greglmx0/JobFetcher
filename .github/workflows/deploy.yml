@@ -45,5 +45,5 @@ jobs:
           script: |
             echo "Starting docker compose for deploy jobfetcher..."
             cd /var/www/html/jobfetcher
-            docker compose -f docker-compose.prod.yaml up --build
+            docker compose -f docker-compose.prod.yaml up --build -d
             echo "Deploy jobfetcher done."
