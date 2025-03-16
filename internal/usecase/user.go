@@ -13,11 +13,11 @@ func NewUserUseCase(repo *repository.UserRepository) *UserUseCase {
     return &UserUseCase{userRepo: repo}
 }
 
-func (u *UserUseCase) GetUser(id int) (*domain.User, error) {
-    return u.userRepo.GetUserByID(id)
+func (u *UserUseCase) GetUserByID(id int) (*domain.User, error) {
+    return u.userRepo.GetUserByID(uint(id)) // Conversion int -> uint
 }
 
-func (u *UserUseCase) GetAllUsers() ([]domain.User, error) {
+func (u *UserUseCase) GetAllUsers() ([]*domain.User, error) {
     return u.userRepo.GetAllUsers()
 }
 

@@ -2,60 +2,54 @@ package repository
 
 import (
 	"JobFetcher/internal/domain"
-	"database/sql"
+	"gorm.io/gorm"
 )
 
+// UserRepository gère les opérations CRUD sur les utilisateurs
 type UserRepository struct {
-    db *sql.DB
+    db *gorm.DB
 }
 
-func NewUserRepository(db *sql.DB) *UserRepository {
+// NewUserRepository crée une nouvelle instance de UserRepository
+func NewUserRepository(db *gorm.DB) *UserRepository {
     return &UserRepository{db: db}
 }
 
-func (r *UserRepository) GetUserByID(id int) (*domain.User, error) {
+// GetUserByID récupère un utilisateur par son ID
+func (r *UserRepository) GetUserByID(id uint) (*domain.User, error) {
     var user domain.User
-    err := r.db.QueryRow("SELECT id, name, email FROM users WHERE id = ?", id).Scan(&user.ID, &user.Name, &user.Email)
-    if err != nil {
-        return nil, err
+    result := r.db.First(&user, id)
+    if result.Error != nil {
+        return nil, result.Error
     }
     return &user, nil
 }
 
-func (r *UserRepository) GetAllUsers() ([]domain.User, error) {
-    rows, err := r.db.Query("SELECT id, name, email FROM users")
-    if err != nil {
-        return nil, err
+// GetAllUsers récupère tous les utilisateurs
+func (r *UserRepository) GetAllUsers() ([]*domain.User, error) {
+    var users []*domain.User
+    result := r.db.Find(&users)
+    if result.Error != nil {
+        return nil, result.Error
     }
-    defer rows.Close()
-
-    var users []domain.User
-    for rows.Next() {
-        var user domain.User
-        err := rows.Scan(&user.ID, &user.Name, &user.Email)
-        if err != nil {
-            return nil, err
-        }
-        users = append(users, user)
-    }
-
     return users, nil
 }
 
-
+// CreateUser crée un nouvel utilisateur et retourne l'objet mis à jour avec son ID
 func (r *UserRepository) CreateUser(user *domain.User) (*domain.User, error) {
-    _, err := r.db.Exec("INSERT INTO users (name, email) VALUES (?, ?)", user.Name, user.Email)
-    if err != nil {
-        return nil, err
+    result := r.db.Create(user)
+    if result.Error != nil {
+        return nil, result.Error
     }
     return user, nil
 }
 
+// GetUserByEmail récupère un utilisateur par son email
 func (r *UserRepository) GetUserByEmail(email string) (*domain.User, error) {
     var user domain.User
-    err := r.db.QueryRow("SELECT id, name, email FROM users WHERE email = ?", email).Scan(&user.ID, &user.Name, &user.Email)
-    if err != nil {
-        return nil, err
+    result := r.db.Where("email = ?", email).First(&user)
+    if result.Error != nil {
+        return nil, result.Error
     }
     return &user, nil
 }

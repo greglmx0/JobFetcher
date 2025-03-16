@@ -62,7 +62,7 @@ func processVIEMissions(missions []MissionVIEResponce, websiteSource string, mis
 	for _, mission := range missions {
 		convertedMission := ConvertVIEMissionResponseToMission(mission, websiteSource)
 
-		existingMissions, err := missionRepo.GetMissionsByWebsiteSourceAndWebsiteID(convertedMission.WebsiteSource, convertedMission.WebsiteId)
+		existingMissions, err := missionRepo.GetMissionsByWebsiteSourceAndWebsiteID(websiteSource, uint(convertedMission.WebsiteId))
 		if err != nil {
 			log.Printf("Erreur lors de la récupération des missions existantes: %v", err)
 			continue

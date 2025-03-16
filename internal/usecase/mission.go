@@ -26,9 +26,9 @@ func (m *MissionUseCase) GetMissionByWebsiteSource(websiteSource string) ([]*dom
 }
 
 func (m *MissionUseCase) GetMissionByID(id int) (*domain.Mission, error) {
-	return m.missionRepo.GetMissionByID(id)
+    return m.missionRepo.GetMissionByID(uint(id)) // Conversion int -> uint
 }
 
-func (m *MissionUseCase) GetMissionsByWebsiteSourceAndWebsiteID(name string, id int) ([]domain.Mission, error) {
-	return m.missionRepo.GetMissionsByWebsiteSourceAndWebsiteID(name, id)
+func (m *MissionUseCase) GetMissionsByWebsiteSourceAndWebsiteID(websiteSource string, id int) ([]*domain.Mission, error) {
+    return m.missionRepo.GetMissionsByWebsiteSourceAndWebsiteID(websiteSource, uint(id)) // Conversion int -> uint
 }

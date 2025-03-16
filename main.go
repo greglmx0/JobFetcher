@@ -3,6 +3,7 @@ package main
 import (
 	"JobFetcher/internal/cron"
 	"JobFetcher/internal/db"
+	"JobFetcher/internal/fixtures"
 	"log"
 	"net/http"
 	"os"
@@ -36,7 +37,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Erreur lors de l'initialisation de la base de données: %v", err)
 	}
-	defer db.Close()
+
+	err = fixtures.LoadWebsiteFixture(db)
+	if err != nil {
+		log.Fatal("Erreur lors du chargement des fixtures :", err)
+	}
+
+	log.Println("Base de données prête avec la fixture Website 🎉")
 
 	// Initialiser les dépendances
 	userRepo := repository.NewUserRepository(db)

@@ -26,5 +26,6 @@ func (w *WebsiteUseCase) GetWebsiteByName(name string) (*domain.Website, error) 
 }
 
 func (w *WebsiteUseCase) DeleteWebsiteByID(id int) error {
-	return w.websiteRepo.DeleteWebsiteByID(id)
+    return w.websiteRepo.DeleteWebsiteByID(uint(id)) // Conversion int -> uint
 }
+
