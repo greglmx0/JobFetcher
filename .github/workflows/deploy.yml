@@ -23,7 +23,7 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.VPS_PORT }}
-          source: "*"
+          source: "."
           target: "/var/www/html/jobfetcher"
           strip_components: 1
           overwrite: true
