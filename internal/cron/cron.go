@@ -23,7 +23,8 @@ type APIResponse struct {
 // InitCron initialise et démarre le planificateur de tâches cron
 func InitCron(telegramBot *telegram.TelegramBot, telegramChatID int64, webSiteRepo *repository.WebsiteRepository, missionRepo *repository.MissionRepository) {
 	c := cron.New()
-	c.AddFunc("*/5 * * * * *", func() {
+	c.AddFunc("@every 2m", func() {
+		log.Println("Exécution de la tâche cron ", time.Now())
 		websites, err := webSiteRepo.GetAllWebsites()
 		if err != nil {
 			log.Printf("Erreur lors de la récupération des sites web: %v", err)
